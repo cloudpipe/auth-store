@@ -19,6 +19,9 @@ func main() {
 		"address": c.ListenAddr(),
 	}).Info("Auth API listening.")
 
+	// v1 routes
+	http.HandleFunc("/v1/style", BindContext(c, StyleHandler))
+
 	http.ListenAndServeTLS(c.ListenAddr(), c.Cert, c.Key, nil)
 }
 
