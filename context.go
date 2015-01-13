@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/kelseyhightower/envconfig"
 )
@@ -8,6 +10,8 @@ import (
 // Context provides shared state among route handlers.
 type Context struct {
 	Settings
+
+	Storage Storage
 }
 
 // Settings contains configuration options loaded from the environment.
@@ -90,5 +94,17 @@ func NewContext() (*Context, error) {
 		"key":            c.Key,
 	}).Info("Initializing with loaded settings.")
 
+	// Connect to MongoDB
+
+	c.Storage, err = NewMongoStorage(c)
+	if err != nil {
+		return c, err
+	}
+
 	return c, nil
+}
+
+// ListenAddr generates an address to bind the net/http server to based on the current settings.
+func (c *Context) ListenAddr() string {
+	return fmt.Sprintf(":%d", c.Port)
 }
