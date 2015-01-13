@@ -1,0 +1,9 @@
+---
+auth-store:
+  build: .
+  links:
+  - mongo
+  ports:
+  - "8000:8000"
+mongo:
+  image: mongo:2.8
