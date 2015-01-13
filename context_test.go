@@ -84,11 +84,11 @@ func TestDefaultValues(t *testing.T) {
 		t.Errorf("Unexpected CA certificate path: [%s]", c.CACert)
 	}
 
-	if c.Cert != "/certificates/cert.pem" {
+	if c.Cert != "/certificates/auth-store-cert.pem" {
 		t.Errorf("Unexpected certificate path: [%s]", c.Cert)
 	}
 
-	if c.Key != "/certificates/key.pem" {
+	if c.Key != "/certificates/auth-store-key.pem" {
 		t.Errorf("Unexpected private key path: [%s]", c.Key)
 	}
 }

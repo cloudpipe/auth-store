@@ -24,6 +24,30 @@ func (c *Context) Load() error {
 		return err
 	}
 
+	if c.Port == 0 {
+		c.Port = 8000
+	}
+
+	if c.LogLevel == "" {
+		c.LogLevel = "info"
+	}
+
+	if c.MongoURL == "" {
+		c.MongoURL = "mongo"
+	}
+
+	if c.CACert == "" {
+		c.CACert = "/certificates/ca.pem"
+	}
+
+	if c.Cert == "" {
+		c.Cert = "/certificates/auth-store-cert.pem"
+	}
+
+	if c.Key == "" {
+		c.Key = "/certificates/auth-store-key.pem"
+	}
+
 	return nil
 }
 
