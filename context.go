@@ -1,6 +1,9 @@
 package main
 
-import "github.com/kelseyhightower/envconfig"
+import (
+	log "github.com/Sirupsen/logrus"
+	"github.com/kelseyhightower/envconfig"
+)
 
 // Context provides shared state among route handlers.
 type Context struct {
@@ -48,12 +51,44 @@ func (c *Context) Load() error {
 		c.Key = "/certificates/auth-store-key.pem"
 	}
 
+	if _, err := log.ParseLevel(c.LogLevel); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // NewContext loads configuration from the environment and applies immediate, global settings.
 func NewContext() (*Context, error) {
 	c := &Context{}
+
+	if err := c.Load(); err != nil {
+		return c, err
+	}
+
+	// Configure the logging level and formatter.
+
+	level, err := log.ParseLevel(c.LogLevel)
+	if err != nil {
+		return c, err
+	}
+	log.SetLevel(level)
+
+	log.SetFormatter(&log.TextFormatter{
+		ForceColors: c.LogColors,
+	})
+
+	// Summarize the loaded settings.
+
+	log.WithFields(log.Fields{
+		"port":           c.Port,
+		"logging level":  c.LogLevel,
+		"log with color": c.LogColors,
+		"mongo URL":      c.MongoURL,
+		"CA cert":        c.CACert,
+		"cert":           c.Cert,
+		"key":            c.Key,
+	}).Info("Initializing with loaded settings.")
 
 	return c, nil
 }
