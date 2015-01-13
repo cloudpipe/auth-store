@@ -1,0 +1,5 @@
+{
+	"ImportPath": "github.com/cloudpipe/auth-store",
+	"GoVersion": "go1.4",
+	"Deps": []
+}
