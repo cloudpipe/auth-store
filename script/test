@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+
+ROOT=$(dirname $0)/..
+cd ${ROOT}
+
+fig build >/dev/null 2>&1 || echo "fig build failed!"
+
+exec fig run --no-deps --rm authstore go test github.com/cloudpipe/auth-store/... $@
