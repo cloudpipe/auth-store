@@ -1,5 +1,11 @@
 {
 	"ImportPath": "github.com/cloudpipe/auth-store",
 	"GoVersion": "go1.4",
-	"Deps": []
+	"Deps": [
+		{
+			"ImportPath": "github.com/kelseyhightower/envconfig",
+			"Comment": "v1.0.0-6-ge904934",
+			"Rev": "e9049346b6aae8e6ad500c5a4519ad029439d660"
+		}
+	]
 }
