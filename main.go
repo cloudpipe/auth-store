@@ -24,7 +24,14 @@ func main() {
 	// v1 routes
 	http.HandleFunc("/v1/style", BindContext(c, StyleHandler))
 
-	http.ListenAndServeTLS(c.ListenAddr(), c.Cert, c.Key, nil)
+	http.HandleFunc("/v1/accounts", BindContext(c, AccountHandler))
+
+	err = http.ListenAndServeTLS(c.ListenAddr(), c.Cert, c.Key, nil)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Error("Unable to launch auth API.")
+	}
 }
 
 // ContextHandler is an HTTP HandlerFunc that accepts an additional parameter containing the

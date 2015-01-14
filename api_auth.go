@@ -20,6 +20,20 @@ func StyleHandler(c *Context, w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "auth-store")
 }
 
+// AccountHandler dispatches requests to handlers that manage the /account resource based on
+// request method.
+func AccountHandler(c *Context, w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "POST":
+		CreateHandler(c, w, r)
+	default:
+		APIError{
+			Message: fmt.Sprintf("Unsupported method %s. Only POST is accepted for this resource.",
+				r.Method),
+		}.Log("").Report(w, http.StatusMethodNotAllowed)
+	}
+}
+
 // CreateHandler creates and persists a new account based on a username and password. An error is
 // returned if the username is not unique. Otherwise, an accepted status is returned.
 func CreateHandler(c *Context, w http.ResponseWriter, r *http.Request) {
