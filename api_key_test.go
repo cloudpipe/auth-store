@@ -78,3 +78,46 @@ func TestKeyGenerationSuccess(t *testing.T) {
 		t.Errorf("Expected API key [%s] to be appended to account, but was [%s]", key, *s.Appended)
 	}
 }
+
+func TestKeyGenerationNoAuth(t *testing.T) {
+	r := HTTPRequest(t, "POST", "https://localhost/v1/keys", "")
+	w := httptest.NewRecorder()
+	c := &Context{Storage: &KeyTestStorage{}}
+
+	KeyHandler(c, w, r)
+
+	if w.Code != http.StatusUnauthorized {
+		t.Errorf("Expected response code %d, but was %d", http.StatusUnauthorized, w.Code)
+	}
+}
+
+func TestKeyGenerationBadPassword(t *testing.T) {
+	r := HTTPRequest(t, "POST", "https://localhost/v1/keys", "")
+	r.SetBasicAuth("someone@gmail.com", "wrongwrongwrong")
+	w := httptest.NewRecorder()
+	a, err := NewAccount("someone@gmail.com", "correct")
+	if err != nil {
+		t.Fatalf("Unable to create account: %v", err)
+	}
+	s := &KeyTestStorage{FoundAccount: a}
+	c := &Context{Storage: s}
+
+	KeyHandler(c, w, r)
+
+	if w.Code != http.StatusUnauthorized {
+		t.Errorf("Expected response code %d, but was %d", http.StatusUnauthorized, w.Code)
+	}
+}
+
+func TestKeyGenerationBadAccountName(t *testing.T) {
+	r := HTTPRequest(t, "POST", "https://localhost/v1/keys", "")
+	r.SetBasicAuth("someone@gmail.com", "wrongwrongwrong")
+	w := httptest.NewRecorder()
+	c := &Context{Storage: &KeyTestStorage{}}
+
+	KeyHandler(c, w, r)
+
+	if w.Code != http.StatusUnauthorized {
+		t.Errorf("Expected response code %d, but was %d", http.StatusUnauthorized, w.Code)
+	}
+}

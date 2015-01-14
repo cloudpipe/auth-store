@@ -24,24 +24,41 @@ func KeyGenerationHandler(c *Context, w http.ResponseWriter, r *http.Request) {
 	// Validate the credentials provided in basic auth.
 	accountName, password, ok := r.BasicAuth()
 	if !ok {
+		APIError{
+			UserMessage: "Please use HTTP basic authentication to provide an account name and password.",
+			LogMessage:  "Key generation request failed due to missing credentials.",
+		}.Log("").Report(w, http.StatusUnauthorized)
 		return
 	}
+
+	rejectAuth := func() {
+		APIError{
+			UserMessage: "Incorrect account name or password.",
+			LogMessage:  "Authentication failure for account.",
+		}.Log(accountName).Report(w, http.StatusUnauthorized)
+	}
+
 	account, err := c.Storage.FindAccount(accountName)
 	if err != nil {
+		APIError{
+			UserMessage: "Internal storage error. Please try again later.",
+			LogMessage:  fmt.Sprintf("Error finding account: %v", err),
+		}.Log(accountName).Report(w, http.StatusInternalServerError)
 		return
 	}
 	if account == nil {
 		// Account does not exist. Treat this exactly like a failed password attempt.
+
 		// Thwart timing attacks by doing a fake bcrypt comparison.
+		(&Account{}).HasPassword(password)
+
+		rejectAuth()
 		return
 	}
 
 	if !account.HasPassword(password) {
 		// BZZZZZZZT
-		APIError{
-			UserMessage: "Incorrect account name or password.",
-			LogMessage:  "Authentication failure for account.",
-		}.Log(accountName).Report(w, http.StatusUnauthorized)
+		rejectAuth()
 		return
 	}
 
