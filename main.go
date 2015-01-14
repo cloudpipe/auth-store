@@ -26,6 +26,7 @@ func main() {
 	http.HandleFunc("/v1/validate", BindContext(c, ValidateHandler))
 
 	http.HandleFunc("/v1/accounts", BindContext(c, AccountHandler))
+	http.HandleFunc("/v1/keys", BindContext(c, KeyHandler))
 
 	err = http.ListenAndServeTLS(c.ListenAddr(), c.Cert, c.Key, nil)
 	if err != nil {
