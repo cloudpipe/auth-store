@@ -13,6 +13,14 @@
 			"Rev": "e9049346b6aae8e6ad500c5a4519ad029439d660"
 		},
 		{
+			"ImportPath": "golang.org/x/crypto/bcrypt",
+			"Rev": "4ed45ec682102c643324fae5dff8dab085b6c300"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/blowfish",
+			"Rev": "4ed45ec682102c643324fae5dff8dab085b6c300"
+		},
+		{
 			"ImportPath": "gopkg.in/mgo.v2",
 			"Rev": "e2e914857713db7497cca2bd7fc0b030fc9cb22d"
 		}
