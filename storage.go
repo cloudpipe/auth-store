@@ -33,10 +33,13 @@ func (storage *MongoStorage) accounts() *mgo.Collection {
 	return storage.Database.C("accounts")
 }
 
+// CreateAccount persists an Account model into Mongo as it's currently populated.
 func (storage *MongoStorage) CreateAccount(account *Account) error {
 	return storage.accounts().Insert(account)
 }
 
+// FindAccount queries for an existing account with a specified name. If no such account exists,
+// nil is returned.
 func (storage *MongoStorage) FindAccount(name string) (*Account, error) {
 	var account Account
 	err := storage.accounts().FindId(name).One(&account)
