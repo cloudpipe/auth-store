@@ -5,5 +5,7 @@ authstore:
   - mongo
   ports:
   - "8001:8000"
+  volumes:
+  - "certificates:/certificates"
 mongo:
   image: mongo:2.8
