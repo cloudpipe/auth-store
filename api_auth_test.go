@@ -31,7 +31,7 @@ func TestCreateHandlerSuccess(t *testing.T) {
 	CreateHandler(c, w, r)
 
 	if w.Code != http.StatusCreated {
-		t.Errorf("Expected 201 response, but got [%d]", w.Code)
+		t.Errorf("Expected response code %d, but was %d", http.StatusCreated, w.Code)
 	}
 
 	if w.Body.Len() != 0 {
@@ -49,6 +49,14 @@ func TestCreateHandlerSuccess(t *testing.T) {
 	}
 }
 
-func TestCreateHandlerFailure(t *testing.T) {
-	t.Fatal("pending")
+func TestCreateHandlerInvalidJSON(t *testing.T) {
+	r := HTTPRequest(t, "POST", "https://localhost/v1/accounts", `{ "wat"`)
+	w := httptest.NewRecorder()
+	c := &Context{}
+
+	CreateHandler(c, w, r)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected response code %d, but was %d", http.StatusBadRequest, w.Code)
+	}
 }

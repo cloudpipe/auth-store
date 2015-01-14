@@ -33,7 +33,7 @@ func CreateHandler(c *Context, w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		APIError{
 			Message: fmt.Sprintf("Unable to parse JSON from your request: %v", err),
-		}.Log("").Report(w, http.StatusInternalServerError)
+		}.Log("").Report(w, http.StatusBadRequest)
 		return
 	}
 
