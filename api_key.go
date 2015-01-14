@@ -93,19 +93,8 @@ func KeyGenerationHandler(c *Context, w http.ResponseWriter, r *http.Request) {
 
 // KeyRevocationHandler marks an API key as invalid for a specific account.
 func KeyRevocationHandler(c *Context, w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		APIError{
-			Message: fmt.Sprintf("Unable to parse URL parameters: %v", err),
-		}.Log("").Report(w, http.StatusBadRequest)
-		return
-	}
-
-	accountName, apiKey := r.FormValue("accountName"), r.FormValue("apiKey")
-	if accountName == "" || apiKey == "" {
-		APIError{
-			UserMessage: `Missing required query parameters "accountName" and "apiKey".`,
-			LogMessage:  "Key revocation request missing required query parameters.",
-		}.Log("").Report(w, http.StatusBadRequest)
+	accountName, apiKey, ok := ExtractKeyCredentials(w, r, "Key revocation")
+	if !ok {
 		return
 	}
 
