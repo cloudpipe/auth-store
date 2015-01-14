@@ -53,8 +53,8 @@ func (storage *KeyTestStorage) RevokeKeyFromAccount(name, key string) error {
 }
 
 func TestKeyGenerationSuccess(t *testing.T) {
-	r := HTTPRequest(t, "POST", "https://localhost/v1/keys", "")
-	r.SetBasicAuth("someone@gmail.com", "secret")
+	r := HTTPRequest(t, "POST", "https://localhost/v1/keys",
+		`accountName=someone%40gmail.com&password=secret`)
 	w := httptest.NewRecorder()
 	a, err := NewAccount("someone@gmail.com", "secret")
 	if err != nil {
@@ -94,21 +94,9 @@ func TestKeyGenerationSuccess(t *testing.T) {
 	}
 }
 
-func TestKeyGenerationNoAuth(t *testing.T) {
-	r := HTTPRequest(t, "POST", "https://localhost/v1/keys", "")
-	w := httptest.NewRecorder()
-	c := &Context{Storage: &KeyTestStorage{}}
-
-	KeyHandler(c, w, r)
-
-	if w.Code != http.StatusUnauthorized {
-		t.Errorf("Expected response code %d, but was %d", http.StatusUnauthorized, w.Code)
-	}
-}
-
 func TestKeyGenerationBadPassword(t *testing.T) {
-	r := HTTPRequest(t, "POST", "https://localhost/v1/keys", "")
-	r.SetBasicAuth("someone@gmail.com", "wrongwrongwrong")
+	r := HTTPRequest(t, "POST", "https://localhost/v1/keys",
+		`accountName=someone%40gmail.com&password=wrongwrongwrong`)
 	w := httptest.NewRecorder()
 	a, err := NewAccount("someone@gmail.com", "correct")
 	if err != nil {
@@ -125,8 +113,8 @@ func TestKeyGenerationBadPassword(t *testing.T) {
 }
 
 func TestKeyGenerationBadAccountName(t *testing.T) {
-	r := HTTPRequest(t, "POST", "https://localhost/v1/keys", "")
-	r.SetBasicAuth("someone@gmail.com", "wrongwrongwrong")
+	r := HTTPRequest(t, "POST", "https://localhost/v1/keys",
+		`accountName=unknown%40gmail.com&password=vacuouslytrue`)
 	w := httptest.NewRecorder()
 	c := &Context{Storage: &KeyTestStorage{}}
 

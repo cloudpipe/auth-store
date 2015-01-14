@@ -26,13 +26,9 @@ func KeyHandler(c *Context, w http.ResponseWriter, r *http.Request) {
 // KeyGenerationHandler generates a new API key for a provided user account. It persists the new
 // key in storage and returns it as a plaintext string.
 func KeyGenerationHandler(c *Context, w http.ResponseWriter, r *http.Request) {
-	// Validate the credentials provided in basic auth.
-	accountName, password, ok := r.BasicAuth()
+	// Validate the credentials provided as query parameters.
+	accountName, password, ok := ExtractPasswordCredentials(w, r, "Key generation")
 	if !ok {
-		APIError{
-			UserMessage: "Please use HTTP basic authentication to provide an account name and password.",
-			LogMessage:  "Key generation request failed due to missing credentials.",
-		}.Log("").Report(w, http.StatusUnauthorized)
 		return
 	}
 
