@@ -11,6 +11,7 @@ type Storage interface {
 	FindAccount(name string) (*Account, error)
 	AddKeyToAccount(name, key string) error
 	RevokeKeyFromAccount(name, key string) error
+	AccountHasKey(name, key string) (bool, error)
 }
 
 // MongoStorage is a Storage implementation that connects to a real MongoDB cluster.
@@ -59,6 +60,17 @@ func (storage *MongoStorage) RevokeKeyFromAccount(name, key string) error {
 	})
 }
 
+// AccountHasKey returns true if the named account has an associated API key that matches the
+// provided one, or false if it does not.
+func (storage *MongoStorage) AccountHasKey(name, key string) (bool, error) {
+	n, err := storage.accounts().Find(bson.M{
+		"_id":      name,
+		"api_keys": key,
+	}).Count()
+
+	return n == 1, err
+}
+
 // NullStorage provides no-op implementations of Storage methods. It's useful for selective
 // overriding in unit tests.
 type NullStorage struct{}
@@ -81,6 +93,11 @@ func (storage NullStorage) AddKeyToAccount(name, key string) error {
 // RevokeKeyFromAccount is a no-op.
 func (storage NullStorage) RevokeKeyFromAccount(name, key string) error {
 	return nil
+}
+
+// AccountHasKey always returns false.
+func (storage NullStorage) AccountHasKey(name, key string) (bool, error) {
+	return false, nil
 }
 
 // Ensure that NullStorage obeys the Storage interface.
