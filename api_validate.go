@@ -14,7 +14,7 @@ func ValidateHandler(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accountName, apiKey, ok := ExtractCredentials(w, r)
+	accountName, apiKey, ok := ExtractKeyCredentials(w, r, "Key validation")
 	if !ok {
 		return
 	}
