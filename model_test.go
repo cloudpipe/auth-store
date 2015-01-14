@@ -40,3 +40,27 @@ func TestHasPassword(t *testing.T) {
 		t.Error("Incorrect password accepted")
 	}
 }
+
+func TestGenerateAPIKey(t *testing.T) {
+	account, err := NewAccount("sample", "secret")
+	if err != nil {
+		t.Fatalf("Unable to create account: %v", err)
+	}
+
+	if len(account.APIKeys) != 1 {
+		t.Errorf("Expected newly created account to have 1 API key, but had %d", len(account.APIKeys))
+	}
+
+	key, err := account.GenerateAPIKey()
+	if err != nil {
+		t.Errorf("Unexpected error generating an API key: %v", err)
+	}
+
+	if len(account.APIKeys) != 2 {
+		t.Errorf("Expected account to have two API keys, but had %d", len(account.APIKeys))
+	}
+
+	if account.APIKeys[1] != key {
+		t.Errorf("Expected the generated key [%s] to match the account [%s]", key, account.APIKeys[1])
+	}
+}
