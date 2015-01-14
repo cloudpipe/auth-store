@@ -23,6 +23,7 @@ func main() {
 
 	// v1 routes
 	http.HandleFunc("/v1/style", BindContext(c, StyleHandler))
+	http.HandleFunc("/v1/validate", BindContext(c, ValidateHandler))
 
 	http.HandleFunc("/v1/accounts", BindContext(c, AccountHandler))
 
