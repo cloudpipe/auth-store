@@ -17,5 +17,8 @@ func HTTPRequest(t *testing.T, method, url, body string) *http.Request {
 	if err != nil {
 		t.Fatalf("Unable to create a request: %v", err)
 	}
+	if body != "" {
+		r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	}
 	return r
 }

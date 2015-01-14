@@ -23,11 +23,10 @@ Create a new account.
 
 *Request*
 
-```javascript
-{
-  "name": "", // Requested account name
-  "password": "" // Password to use
-}
+The Content-Type header must be `application/x-www-form-urlencoded`.
+
+```
+accountName={account}&password={password}
 ```
 
 *Response*
@@ -42,7 +41,11 @@ Generate a new API key and associate it with your account.
 
 *Request*
 
-Include a valid account name and password as HTTP basic auth.
+The Content-Type header must be `application/x-www-form-urlencoded`.
+
+```
+accountName={account}&password={password}
+```
 
 *Response*
 
