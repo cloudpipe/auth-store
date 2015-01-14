@@ -1,11 +1,15 @@
 package main
 
-import "gopkg.in/mgo.v2"
+import (
+	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
+)
 
 // Storage provides high-level interactions with an underlying storage mechanism.
 type Storage interface {
 	CreateAccount(account *Account) error
 	FindAccount(name string) (*Account, error)
+	AddKeyToAccount(name, key string) error
 }
 
 // MongoStorage is a Storage implementation that connects to a real MongoDB cluster.
@@ -40,6 +44,13 @@ func (storage *MongoStorage) FindAccount(name string) (*Account, error) {
 	return &account, err
 }
 
+// AddKeyToAccount appends a newly generated API key to an existing account.
+func (storage *MongoStorage) AddKeyToAccount(name, key string) error {
+	return storage.accounts().UpdateId(name, bson.M{
+		"$push": bson.M{"apiKeys": key},
+	})
+}
+
 // NullStorage provides no-op implementations of Storage methods. It's useful for selective
 // overriding in unit tests.
 type NullStorage struct{}
@@ -52,6 +63,11 @@ func (storage NullStorage) CreateAccount(*Account) error {
 // FindAccount always fails to find an account.
 func (storage NullStorage) FindAccount(name string) (*Account, error) {
 	return nil, nil
+}
+
+// AddKeyToAccount is a no-op.
+func (storage NullStorage) AddKeyToAccount(name, key string) error {
+	return nil
 }
 
 // Ensure that NullStorage obeys the Storage interface.
