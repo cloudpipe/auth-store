@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	"gopkg.in/mgo.v2"
 )
 
 // KeyHandler dispatches requests made to the /keys resource to relevant subhandlers
@@ -10,6 +12,8 @@ func KeyHandler(c *Context, w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		KeyGenerationHandler(c, w, r)
+	case "DELETE":
+		KeyRevocationHandler(c, w, r)
 	default:
 		APIError{
 			Message: fmt.Sprintf("Unsupported method %s. Only POST is accepted for this resource.",
@@ -83,4 +87,39 @@ func KeyGenerationHandler(c *Context, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(key))
+}
+
+// KeyRevocationHandler marks an API key as invalid for a specific account.
+func KeyRevocationHandler(c *Context, w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		APIError{
+			Message: fmt.Sprintf("Unable to parse URL parameters: %v", err),
+		}.Log("").Report(w, http.StatusBadRequest)
+		return
+	}
+
+	accountName, apiKey := r.FormValue("accountName"), r.FormValue("apiKey")
+	if accountName == "" || apiKey == "" {
+		APIError{
+			UserMessage: `Missing required query parameters "accountName" and "apiKey".`,
+			LogMessage:  "Key revocation request missing required query parameters.",
+		}.Log("").Report(w, http.StatusBadRequest)
+		return
+	}
+
+	if err := c.Storage.RevokeKeyFromAccount(accountName, apiKey); err != nil {
+		if err == mgo.ErrNotFound {
+			APIError{
+				Message: "Unrecognized account or API key.",
+			}.Log(accountName).Report(w, http.StatusUnauthorized)
+			return
+		}
+		APIError{
+			UserMessage: "Internal storage error encountered. Please try again later.",
+			LogMessage:  fmt.Sprintf("Storage error: %v", err),
+		}.Log(accountName).Report(w, http.StatusInternalServerError)
+	}
+
+	// Success!
+	w.WriteHeader(http.StatusNoContent)
 }

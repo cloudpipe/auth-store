@@ -15,11 +15,17 @@ type KeyTestStorage struct {
 
 	AccountName *string
 	Appended    *string
+	Revoked     *string
+}
+
+func (storage *KeyTestStorage) consumeError() error {
+	err := storage.NextError
+	storage.NextError = nil
+	return err
 }
 
 func (storage *KeyTestStorage) FindAccount(name string) (*Account, error) {
-	if err := storage.NextError; err != nil {
-		storage.NextError = nil
+	if err := storage.consumeError(); err != nil {
 		return nil, err
 	}
 
@@ -27,13 +33,22 @@ func (storage *KeyTestStorage) FindAccount(name string) (*Account, error) {
 }
 
 func (storage *KeyTestStorage) AddKeyToAccount(name, key string) error {
-	if err := storage.NextError; err != nil {
-		storage.NextError = nil
+	if err := storage.consumeError(); err != nil {
 		return err
 	}
 
 	storage.AccountName = &name
 	storage.Appended = &key
+	return nil
+}
+
+func (storage *KeyTestStorage) RevokeKeyFromAccount(name, key string) error {
+	if err := storage.consumeError(); err != nil {
+		return err
+	}
+
+	storage.AccountName = &name
+	storage.Revoked = &key
 	return nil
 }
 
@@ -119,5 +134,34 @@ func TestKeyGenerationBadAccountName(t *testing.T) {
 
 	if w.Code != http.StatusUnauthorized {
 		t.Errorf("Expected response code %d, but was %d", http.StatusUnauthorized, w.Code)
+	}
+}
+
+func TestKeyRevocationSuccess(t *testing.T) {
+	r := HTTPRequest(t, "DELETE", "https://localhost/v1/keys?accountName=someone&apiKey=123abc", "")
+	w := httptest.NewRecorder()
+	a, err := NewAccount("someone", "secret")
+	if err != nil {
+		t.Fatalf("Unable to create account: %v", err)
+	}
+	s := &KeyTestStorage{FoundAccount: a}
+	c := &Context{Storage: s}
+
+	KeyRevocationHandler(c, w, r)
+
+	if w.Code != http.StatusNoContent {
+		t.Errorf("Expected response code %d, but was %d", http.StatusNoContent, w.Code)
+	}
+
+	if s.AccountName == nil || s.Revoked == nil {
+		t.Fatal("Expected storage to process key revocation")
+	}
+
+	if *s.AccountName != "someone" {
+		t.Errorf("Unexpected account name [%s]", *s.AccountName)
+	}
+
+	if *s.Revoked != "123abc" {
+		t.Errorf("Unexpected revoked key [%s]", *s.Revoked)
 	}
 }
