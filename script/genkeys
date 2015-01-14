@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -o errexit
+
+ROOT=$(cd $(dirname $0)/..; pwd)
+cd ${ROOT}
+
+OPENSSL="docker run --volume ${ROOT}/certificates:/certificates --rm smashwilson/openssl"
+
+${OPENSSL} openssl req -x509 -newkey rsa:2048 -days 365 -nodes -batch \
+  -keyout /certificates/auth-store-key.pem \
+  -out /certificates/auth-store-cert.pem

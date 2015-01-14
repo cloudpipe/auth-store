@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
@@ -22,7 +24,14 @@ func main() {
 	// v1 routes
 	http.HandleFunc("/v1/style", BindContext(c, StyleHandler))
 
-	http.ListenAndServeTLS(c.ListenAddr(), c.Cert, c.Key, nil)
+	http.HandleFunc("/v1/accounts", BindContext(c, AccountHandler))
+
+	err = http.ListenAndServeTLS(c.ListenAddr(), c.Cert, c.Key, nil)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Error("Unable to launch auth API.")
+	}
 }
 
 // ContextHandler is an HTTP HandlerFunc that accepts an additional parameter containing the
@@ -32,4 +41,46 @@ type ContextHandler func(c *Context, w http.ResponseWriter, r *http.Request)
 // BindContext returns an http.HandlerFunc that binds a ContextHandler to a specific Context.
 func BindContext(c *Context, handler ContextHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) { handler(c, w, r) }
+}
+
+// APIError consistently renders error conditions as a JSON payload.
+type APIError struct {
+	Message string `json:"message"`
+}
+
+// Log emits a log message for an error.
+func (err APIError) Log(username string) APIError {
+	f := log.Fields{}
+	if username != "" {
+		f["username"] = username
+	}
+	log.WithFields(f).Error(err.Message)
+	return err
+}
+
+// Report renders an error as an HTTP response with the correct content-type and HTTP status code.
+func (err APIError) Report(w http.ResponseWriter, status int) APIError {
+	w.WriteHeader(status)
+	w.Header().Set("Content-Type", "application/json")
+
+	encodeErr := json.NewEncoder(w).Encode(err)
+	if encodeErr != nil {
+		fmt.Fprintf(w, `{"message":"Unable to encode error: %v"}`, encodeErr)
+	}
+	return err
+}
+
+// MethodOk tests the HTTP request method. If the method is correct, it does nothing and
+// returns true. If it's incorrect, it generates a JSON error and returns false.
+func MethodOk(w http.ResponseWriter, r *http.Request, method string) bool {
+	if r.Method == method {
+		return true
+	}
+
+	APIError{
+		Message: fmt.Sprintf("Unsupported method %s. Only %s is accepted for this resource.",
+			r.Method, method),
+	}.Log("").Report(w, http.StatusMethodNotAllowed)
+
+	return false
 }
