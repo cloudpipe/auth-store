@@ -10,6 +10,7 @@ type Storage interface {
 	CreateAccount(account *Account) error
 	FindAccount(name string) (*Account, error)
 	AddKeyToAccount(name, key string) error
+	RevokeKeyFromAccount(name, key string) error
 }
 
 // MongoStorage is a Storage implementation that connects to a real MongoDB cluster.
@@ -47,7 +48,14 @@ func (storage *MongoStorage) FindAccount(name string) (*Account, error) {
 // AddKeyToAccount appends a newly generated API key to an existing account.
 func (storage *MongoStorage) AddKeyToAccount(name, key string) error {
 	return storage.accounts().UpdateId(name, bson.M{
-		"$push": bson.M{"apiKeys": key},
+		"$push": bson.M{"api_keys": key},
+	})
+}
+
+// RevokeKeyFromAccount removes an API key from an account.
+func (storage *MongoStorage) RevokeKeyFromAccount(name, key string) error {
+	return storage.accounts().UpdateId(name, bson.M{
+		"$pull": bson.M{"api_keys": key},
 	})
 }
 
@@ -67,6 +75,11 @@ func (storage NullStorage) FindAccount(name string) (*Account, error) {
 
 // AddKeyToAccount is a no-op.
 func (storage NullStorage) AddKeyToAccount(name, key string) error {
+	return nil
+}
+
+// RevokeKeyFromAccount is a no-op.
+func (storage NullStorage) RevokeKeyFromAccount(name, key string) error {
 	return nil
 }
 
