@@ -94,8 +94,8 @@ func TestCreateHandlerDuplicateAccount(t *testing.T) {
 func TestCreateHandlerStorageFailure(t *testing.T) {
 	r := HTTPRequest(t, "POST", "https://localhost/v1/accounts", `
 	{
-		"name": "duplicate@gmail.com",
-		"password": "wat"
+		"name": "mongo-go-boom@gmail.com",
+		"password": "uhoh"
 	}
 	`)
 	w := httptest.NewRecorder()
