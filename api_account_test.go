@@ -54,25 +54,9 @@ func TestCreateHandlerSuccess(t *testing.T) {
 	}
 }
 
-func TestCreateHandlerInvalidJSON(t *testing.T) {
-	r := HTTPRequest(t, "POST", "https://localhost/v1/accounts", `{ "wat"`)
-	w := httptest.NewRecorder()
-	c := &Context{}
-
-	CreateHandler(c, w, r)
-
-	if w.Code != http.StatusBadRequest {
-		t.Errorf("Expected response code %d, but was %d", http.StatusBadRequest, w.Code)
-	}
-}
-
 func TestCreateHandlerDuplicateAccount(t *testing.T) {
-	r := HTTPRequest(t, "POST", "https://localhost/v1/accounts", `
-	{
-		"name": "duplicate@gmail.com",
-		"password": "wat"
-	}
-	`)
+	r := HTTPRequest(t, "POST", "https://localhost/v1/accounts",
+		`accountName=someone%40gmail.com&password=secret`)
 	w := httptest.NewRecorder()
 	s := &AuthTestStorage{
 		// See https://github.com/go-mgo/mgo/blob/445c05a1261a0941bc48d898c8eb3ee18ab398c3/session.go#L2116
@@ -88,12 +72,8 @@ func TestCreateHandlerDuplicateAccount(t *testing.T) {
 }
 
 func TestCreateHandlerStorageFailure(t *testing.T) {
-	r := HTTPRequest(t, "POST", "https://localhost/v1/accounts", `
-	{
-		"name": "mongo-go-boom@gmail.com",
-		"password": "uhoh"
-	}
-	`)
+	r := HTTPRequest(t, "POST", "https://localhost/v1/accounts",
+		`accountName=mongo-go-boom%40gmail.com&password=uhoh`)
 	w := httptest.NewRecorder()
 	s := &AuthTestStorage{NextError: errors.New("WTF")}
 	c := &Context{Storage: s}
