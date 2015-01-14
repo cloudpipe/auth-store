@@ -45,21 +45,36 @@ func BindContext(c *Context, handler ContextHandler) http.HandlerFunc {
 
 // APIError consistently renders error conditions as a JSON payload.
 type APIError struct {
-	Message string `json:"message"`
+	// If nonzero, this message will be displayed to the user in the generated response payload.
+	UserMessage string `json:"message"`
+
+	// If nonzero, this message will be displayed to operators in the process log.
+	LogMessage string `json:"-"`
+
+	// Used as both UserMessage and LogMessage if either are missing.
+	Message string `json:"-"`
 }
 
 // Log emits a log message for an error.
 func (err APIError) Log(username string) APIError {
+	if err.LogMessage == "" {
+		err.LogMessage = err.Message
+	}
+
 	f := log.Fields{}
 	if username != "" {
 		f["username"] = username
 	}
-	log.WithFields(f).Error(err.Message)
+	log.WithFields(f).Error(err.LogMessage)
 	return err
 }
 
 // Report renders an error as an HTTP response with the correct content-type and HTTP status code.
 func (err APIError) Report(w http.ResponseWriter, status int) APIError {
+	if err.UserMessage == "" {
+		err.UserMessage = err.Message
+	}
+
 	w.WriteHeader(status)
 	w.Header().Set("Content-Type", "application/json")
 
