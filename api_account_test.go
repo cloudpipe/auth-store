@@ -27,12 +27,8 @@ func (storage *AuthTestStorage) CreateAccount(account *Account) error {
 }
 
 func TestCreateHandlerSuccess(t *testing.T) {
-	r := HTTPRequest(t, "POST", "https://localhost/v1/accounts", `
-	{
-		"name": "someone@gmail.com",
-		"password": "secret"
-	}
-	`)
+	r := HTTPRequest(t, "POST", "https://localhost/v1/accounts",
+		`accountName=someone%40gmail.com&password=secret`)
 	w := httptest.NewRecorder()
 	s := &AuthTestStorage{}
 	c := &Context{Storage: s}

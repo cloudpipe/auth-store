@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -26,21 +25,12 @@ func AccountHandler(c *Context, w http.ResponseWriter, r *http.Request) {
 // CreateHandler creates and persists a new account based on a username and password. An error is
 // returned if the username is not unique. Otherwise, an accepted status is returned.
 func CreateHandler(c *Context, w http.ResponseWriter, r *http.Request) {
-	type request struct {
-		Name     string `json:"name"`
-		Password string `json:"password"`
-	}
-
-	var req request
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		APIError{
-			Message: fmt.Sprintf("Unable to parse JSON from your request: %v", err),
-		}.Log("").Report(w, http.StatusBadRequest)
+	accountName, password, ok := ExtractPasswordCredentials(w, r, "Account creation")
+	if !ok {
 		return
 	}
 
-	account, err := NewAccount(req.Name, req.Password)
+	account, err := NewAccount(accountName, password)
 	if err != nil {
 		APIError{
 			Message: fmt.Sprintf("Unable to create account: %v", err),
@@ -53,18 +43,18 @@ func CreateHandler(c *Context, w http.ResponseWriter, r *http.Request) {
 		APIError{
 			Message: fmt.Sprintf(
 				`The account name "%s" has already been taken. Please choose another.`,
-				req.Name,
+				accountName,
 			),
 		}.Log("").Report(w, http.StatusConflict)
 		return
 	}
 	if err != nil {
-		APIError{Message: "Internal storage error."}.Log(req.Name).Report(w, http.StatusInternalServerError)
+		APIError{Message: "Internal storage error."}.Log(accountName).Report(w, http.StatusInternalServerError)
 		return
 	}
 
 	log.WithFields(log.Fields{
-		"account": req.Name,
+		"account": accountName,
 	}).Info("Account created successfully.")
 
 	w.WriteHeader(http.StatusCreated)

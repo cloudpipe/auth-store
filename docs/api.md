@@ -23,11 +23,8 @@ Create a new account.
 
 *Request*
 
-```javascript
-{
-  "name": "", // Requested account name
-  "password": "" // Password to use
-}
+```
+accountName={account}&password={password}
 ```
 
 *Response*

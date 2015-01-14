@@ -124,7 +124,7 @@ func extractCredentials(w http.ResponseWriter, r *http.Request, requestName, cre
 	if accountName == "" || credential == "" {
 		APIError{
 			UserMessage: fmt.Sprintf(
-				`Missing required query parameters "accountName" and "%s".`,
+				`Missing required parameters "accountName" and "%s".`,
 				credentialName,
 			),
 			LogMessage: fmt.Sprintf(
