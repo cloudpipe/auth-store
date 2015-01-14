@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	log "github.com/Sirupsen/logrus"
 	"gopkg.in/mgo.v2"
 )
 
@@ -73,6 +74,10 @@ func CreateHandler(c *Context, w http.ResponseWriter, r *http.Request) {
 		APIError{Message: "Internal storage error."}.Log(req.Name).Report(w, http.StatusInternalServerError)
 		return
 	}
+
+	log.WithFields(log.Fields{
+		"account": req.Name,
+	}).Info("Account created successfully.")
 
 	w.WriteHeader(http.StatusCreated)
 }
