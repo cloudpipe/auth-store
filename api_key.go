@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	log "github.com/Sirupsen/logrus"
 	"gopkg.in/mgo.v2"
 )
 
@@ -87,6 +88,11 @@ func KeyGenerationHandler(c *Context, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(key))
+
+	log.WithFields(log.Fields{
+		"account": accountName,
+		"key":     key,
+	}).Info("A new API key has been generated.")
 }
 
 // KeyRevocationHandler marks an API key as invalid for a specific account.
@@ -122,4 +128,9 @@ func KeyRevocationHandler(c *Context, w http.ResponseWriter, r *http.Request) {
 
 	// Success!
 	w.WriteHeader(http.StatusNoContent)
+
+	log.WithFields(log.Fields{
+		"account": accountName,
+		"key":     apiKey,
+	}).Info("An existing API key has revoked.")
 }

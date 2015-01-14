@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	log "github.com/Sirupsen/logrus"
 	"gopkg.in/mgo.v2"
 )
 
@@ -44,9 +45,17 @@ func ValidateHandler(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var message string
 	if ok {
 		w.WriteHeader(http.StatusNoContent)
+		message = "API key successfully validated."
 	} else {
 		w.WriteHeader(http.StatusNotFound)
+		message = "Invalid API key encountered."
 	}
+
+	log.WithFields(log.Fields{
+		"account": accountName,
+		"key":     apiKey,
+	}).Info(message)
 }
