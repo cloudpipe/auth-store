@@ -44,7 +44,7 @@ type APIError struct {
 // Log emits a log message for an error.
 func (err APIError) Log(username string) APIError {
 	f := log.Fields{}
-	if username == "" {
+	if username != "" {
 		f["username"] = username
 	}
 	log.WithFields(f).Error(err.Message)
