@@ -14,19 +14,8 @@ func ValidateHandler(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := r.ParseForm(); err != nil {
-		APIError{
-			Message: fmt.Sprintf("Unable to parse URL parameters: %v", err),
-		}.Log("").Report(w, http.StatusBadRequest)
-		return
-	}
-
-	accountName, apiKey := r.FormValue("accountName"), r.FormValue("apiKey")
-	if accountName == "" || apiKey == "" {
-		APIError{
-			UserMessage: `Missing required query parameters "accountName" and "apiKey".`,
-			LogMessage:  "Key validation request missing required query parameters.",
-		}.Log("").Report(w, http.StatusBadRequest)
+	accountName, apiKey, ok := ExtractCredentials(w, r)
+	if !ok {
 		return
 	}
 
