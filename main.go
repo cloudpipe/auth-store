@@ -101,3 +101,23 @@ func MethodOk(w http.ResponseWriter, r *http.Request, method string) bool {
 
 	return false
 }
+
+// ExtractCredentials attempts to read an account name and API key from the request.
+func ExtractCredentials(w http.ResponseWriter, r *http.Request) (accountName, apiKey string, ok bool) {
+	if err := r.ParseForm(); err != nil {
+		APIError{
+			Message: fmt.Sprintf("Unable to parse URL parameters: %v", err),
+		}.Log("").Report(w, http.StatusBadRequest)
+		return "", "", false
+	}
+
+	accountName, apiKey = r.FormValue("accountName"), r.FormValue("apiKey")
+	if accountName == "" || apiKey == "" {
+		APIError{
+			UserMessage: `Missing required query parameters "accountName" and "apiKey".`,
+			LogMessage:  "Key validation request missing required query parameters.",
+		}.Log("").Report(w, http.StatusBadRequest)
+		return "", "", false
+	}
+	return accountName, apiKey, true
+}
