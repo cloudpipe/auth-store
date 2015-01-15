@@ -7,6 +7,17 @@ cd ${ROOT}
 
 OPENSSL="docker run --volume ${ROOT}/certificates:/certificates --rm smashwilson/openssl"
 
-${OPENSSL} openssl req -x509 -newkey rsa:2048 -days 365 -nodes -batch \
-  -keyout /certificates/auth-store-key.pem \
-  -out /certificates/auth-store-cert.pem
+# selfsigned generates a self-signed keypair.
+selfsigned()
+{
+  local NAME=$1
+
+  echo ">> generating keypair for ${NAME}"
+  ${OPENSSL} openssl req -x509 -newkey rsa:2048 -days 365 -nodes -batch \
+    -keyout /certificates/${NAME}-key.pem \
+    -out /certificates/${NAME}-cert.pem
+  echo "<< keypair generated for ${NAME}"
+}
+
+selfsigned "auth-store"
+selfsigned "external"
