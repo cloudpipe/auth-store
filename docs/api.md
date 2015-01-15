@@ -1,6 +1,10 @@
 # API Documentation
 
-#### GET /v1/style
+#### GET / [internal & external]
+
+Returns a hardcoded string. This is useful to test connections and system health.
+
+#### GET /v1/style [internal]
 
 Return a descriptive string that [cloudpipe](https://github.com/cloudpipe/cloudpipe) can report to consumers of its API.
 
@@ -8,7 +12,7 @@ Return a descriptive string that [cloudpipe](https://github.com/cloudpipe/cloudp
 
 The string "authstore" as plaintext.
 
-#### GET /v1/validate?accountName={account}&apiKey={key}
+#### GET /v1/validate?accountName={account}&apiKey={key} [internal]
 
 Validate an API key against an account.
 
@@ -17,7 +21,7 @@ Validate an API key against an account.
 * **204 No Content:** when the account name and API key are valid.
 * **404 Not Found:** when the API key is not valid or the account does not exist.
 
-#### POST /v1/accounts
+#### POST /v1/accounts [external]
 
 Create a new account.
 
@@ -35,7 +39,7 @@ accountName={account}&password={password}
 * **400 Bad Request:** Malformed JSON or incomplete document.
 * **409 Conflict:** Account name already taken.
 
-#### POST /v1/keys
+#### POST /v1/keys [external]
 
 Generate a new API key and associate it with your account.
 
@@ -52,7 +56,7 @@ accountName={account}&password={password}
 * **200 OK:** Key generated successfully. Response body contains the generated API key as plaintext.
 * **401 Unauthorized:** Unable to authenticate with the provided credentials.
 
-#### DELETE /v1/keys?accountName={name}&apiKey={key}
+#### DELETE /v1/keys?accountName={name}&apiKey={key} [external]
 
 Revoke an API key from your account.
 
