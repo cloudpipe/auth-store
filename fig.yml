@@ -3,8 +3,10 @@ authstore:
   build: .
   links:
   - mongo
+  expose:
+  - "9001"
   ports:
-  - "8001:8000"
+  - "9000:9000"
   volumes:
   - "certificates:/certificates"
 mongo:

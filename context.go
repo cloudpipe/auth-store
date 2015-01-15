@@ -35,11 +35,11 @@ func (c *Context) Load() error {
 	}
 
 	if c.InternalPort == 0 {
-		c.InternalPort = 8001
+		c.InternalPort = 9001
 	}
 
 	if c.ExternalPort == 0 {
-		c.ExternalPort = 8000
+		c.ExternalPort = 9000
 	}
 
 	if c.LogLevel == "" {

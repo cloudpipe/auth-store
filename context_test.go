@@ -82,11 +82,11 @@ func TestDefaultValues(t *testing.T) {
 		t.Fatalf("Error loading configuration: %v", err)
 	}
 
-	if c.InternalPort != 8001 {
+	if c.InternalPort != 9001 {
 		t.Errorf("Unexpected internal port: [%d]", c.InternalPort)
 	}
 
-	if c.ExternalPort != 8000 {
+	if c.ExternalPort != 9000 {
 		t.Errorf("Unexpected external port: [%d]", c.ExternalPort)
 	}
 
