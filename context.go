@@ -16,13 +16,16 @@ type Context struct {
 
 // Settings contains configuration options loaded from the environment.
 type Settings struct {
-	Port      int
-	LogLevel  string
-	LogColors bool
-	MongoURL  string
-	CACert    string
-	Cert      string
-	Key       string
+	InternalPort   int
+	ExternalPort   int
+	LogLevel       string
+	LogColors      bool
+	MongoURL       string
+	InternalCACert string
+	InternalCert   string
+	InternalKey    string
+	ExternalCert   string
+	ExternalKey    string
 }
 
 // Load reads configuration settings from the environment and validates them.
@@ -31,8 +34,12 @@ func (c *Context) Load() error {
 		return err
 	}
 
-	if c.Port == 0 {
-		c.Port = 8000
+	if c.InternalPort == 0 {
+		c.InternalPort = 9001
+	}
+
+	if c.ExternalPort == 0 {
+		c.ExternalPort = 9000
 	}
 
 	if c.LogLevel == "" {
@@ -43,16 +50,24 @@ func (c *Context) Load() error {
 		c.MongoURL = "mongo"
 	}
 
-	if c.CACert == "" {
-		c.CACert = "/certificates/ca.pem"
+	if c.InternalCACert == "" {
+		c.InternalCACert = "/certificates/ca.pem"
 	}
 
-	if c.Cert == "" {
-		c.Cert = "/certificates/auth-store-cert.pem"
+	if c.InternalCert == "" {
+		c.InternalCert = "/certificates/auth-store-cert.pem"
 	}
 
-	if c.Key == "" {
-		c.Key = "/certificates/auth-store-key.pem"
+	if c.InternalKey == "" {
+		c.InternalKey = "/certificates/auth-store-key.pem"
+	}
+
+	if c.ExternalCert == "" {
+		c.ExternalCert = "/certificates/external-cert.pem"
+	}
+
+	if c.ExternalKey == "" {
+		c.ExternalKey = "/certificates/external-key.pem"
 	}
 
 	if _, err := log.ParseLevel(c.LogLevel); err != nil {
@@ -85,13 +100,16 @@ func NewContext() (*Context, error) {
 	// Summarize the loaded settings.
 
 	log.WithFields(log.Fields{
-		"port":           c.Port,
-		"logging level":  c.LogLevel,
-		"log with color": c.LogColors,
-		"mongo URL":      c.MongoURL,
-		"CA cert":        c.CACert,
-		"cert":           c.Cert,
-		"key":            c.Key,
+		"internal port":    c.InternalPort,
+		"external port":    c.ExternalPort,
+		"logging level":    c.LogLevel,
+		"log with color":   c.LogColors,
+		"mongo URL":        c.MongoURL,
+		"internal CA cert": c.InternalCACert,
+		"internal cert":    c.InternalCert,
+		"internal key":     c.InternalKey,
+		"external cert":    c.ExternalCert,
+		"external key":     c.ExternalKey,
 	}).Info("Initializing with loaded settings.")
 
 	// Connect to MongoDB
@@ -104,7 +122,12 @@ func NewContext() (*Context, error) {
 	return c, nil
 }
 
-// ListenAddr generates an address to bind the net/http server to based on the current settings.
-func (c *Context) ListenAddr() string {
-	return fmt.Sprintf(":%d", c.Port)
+// InternalListenAddr generates an address to bind the private net/http server to.
+func (c *Context) InternalListenAddr() string {
+	return fmt.Sprintf(":%d", c.InternalPort)
+}
+
+// ExternalListenAddr generates an address to bind the public net/http server to.
+func (c *Context) ExternalListenAddr() string {
+	return fmt.Sprintf(":%d", c.ExternalPort)
 }
