@@ -30,7 +30,7 @@ func ServeInternal(c *Context) {
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte("auth-store internal API alive and running."))
+		w.Write([]byte("auth-store internal API alive and running.\n"))
 	})
 
 	mux.HandleFunc("/v1/style", BindContext(c, StyleHandler))
@@ -78,7 +78,7 @@ func ServeExternal(c *Context) {
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte("auth-store external API alive and running."))
+		w.Write([]byte("auth-store external API alive and running.\n"))
 	})
 
 	mux.HandleFunc("/v1/accounts", BindContext(c, AccountHandler))
