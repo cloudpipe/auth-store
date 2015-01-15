@@ -62,6 +62,14 @@ func (c *Context) Load() error {
 		c.InternalKey = "/certificates/auth-store-key.pem"
 	}
 
+	if c.ExternalCert == "" {
+		c.ExternalCert = "/certificates/external-cert.pem"
+	}
+
+	if c.ExternalKey == "" {
+		c.ExternalKey = "/certificates/external-key.pem"
+	}
+
 	if _, err := log.ParseLevel(c.LogLevel); err != nil {
 		return err
 	}

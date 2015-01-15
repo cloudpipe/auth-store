@@ -114,11 +114,11 @@ func TestDefaultValues(t *testing.T) {
 		t.Errorf("Unexpected internal private key path: [%s]", c.InternalKey)
 	}
 
-	if c.ExternalCert != "" {
+	if c.ExternalCert != "/certificates/external-cert.pem" {
 		t.Errorf("Unexpected external certificate path: [%s]", c.ExternalCert)
 	}
 
-	if c.ExternalKey != "" {
+	if c.ExternalKey != "/certificates/external-key.pem" {
 		t.Errorf("Unexpected external private key: [%s]", c.ExternalKey)
 	}
 }
