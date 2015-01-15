@@ -8,20 +8,27 @@ import (
 func TestLoadFromEnvironment(t *testing.T) {
 	c := &Context{}
 
-	os.Setenv("AUTH_PORT", "4321")
+	os.Setenv("AUTH_INTERNALPORT", "1111")
+	os.Setenv("AUTH_EXTERNALPORT", "2222")
 	os.Setenv("AUTH_LOGLEVEL", "debug")
 	os.Setenv("AUTH_LOGCOLORS", "true")
 	os.Setenv("AUTH_MONGOURL", "server.example.com")
-	os.Setenv("AUTH_CACERT", "/lockbox/ca.pem")
-	os.Setenv("AUTH_CERT", "/lockbox/cert.pem")
-	os.Setenv("AUTH_KEY", "/lockbox/key.pem")
+	os.Setenv("AUTH_INTERNALCACERT", "/lockbox/internal-ca.pem")
+	os.Setenv("AUTH_INTERNALCERT", "/lockbox/internal-cert.pem")
+	os.Setenv("AUTH_INTERNALKEY", "/lockbox/internal-key.pem")
+	os.Setenv("AUTH_EXTERNALCERT", "/lockbox/external-cert.pem")
+	os.Setenv("AUTH_EXTERNALKEY", "/lockbox/external-key.pem")
 
 	if err := c.Load(); err != nil {
 		t.Fatalf("Error loading configuration: %v", err)
 	}
 
-	if c.Port != 4321 {
-		t.Errorf("Unexpected port: [%d]", c.Port)
+	if c.InternalPort != 1111 {
+		t.Errorf("Unexpected internal port: [%d]", c.InternalPort)
+	}
+
+	if c.ExternalPort != 2222 {
+		t.Errorf("Unexpected external port: [%d]", c.ExternalPort)
 	}
 
 	if c.LogLevel != "debug" {
@@ -36,36 +43,51 @@ func TestLoadFromEnvironment(t *testing.T) {
 		t.Errorf("Unexpected MongoDB URL: [%s]", c.MongoURL)
 	}
 
-	if c.CACert != "/lockbox/ca.pem" {
-		t.Errorf("Unexpected CA certificate path: [%s]", c.CACert)
+	if c.InternalCACert != "/lockbox/internal-ca.pem" {
+		t.Errorf("Unexpected internal CA certificate path: [%s]", c.InternalCACert)
 	}
 
-	if c.Cert != "/lockbox/cert.pem" {
-		t.Errorf("Unexpected certificate path: [%s]", c.Cert)
+	if c.InternalCert != "/lockbox/internal-cert.pem" {
+		t.Errorf("Unexpected internal certificate path: [%s]", c.InternalCert)
 	}
 
-	if c.Key != "/lockbox/key.pem" {
-		t.Errorf("Unexpected private key path: [%s]", c.Key)
+	if c.InternalKey != "/lockbox/internal-key.pem" {
+		t.Errorf("Unexpected internal private key path: [%s]", c.InternalKey)
+	}
+
+	if c.ExternalCert != "/lockbox/external-cert.pem" {
+		t.Errorf("Unexpected external certificate path: [%s]", c.ExternalCert)
+	}
+
+	if c.ExternalKey != "/lockbox/external-key.pem" {
+		t.Errorf("Unexpected external private key path: [%s]", c.ExternalKey)
 	}
 }
 
 func TestDefaultValues(t *testing.T) {
 	c := &Context{}
 
-	os.Setenv("AUTH_PORT", "")
+	os.Setenv("AUTH_INTERNALPORT", "")
+	os.Setenv("AUTH_EXTERNALPORT", "")
 	os.Setenv("AUTH_LOGLEVEL", "")
 	os.Setenv("AUTH_LOGCOLORS", "")
 	os.Setenv("AUTH_MONGOURL", "")
-	os.Setenv("AUTH_CACERT", "")
-	os.Setenv("AUTH_CERT", "")
-	os.Setenv("AUTH_KEY", "")
+	os.Setenv("AUTH_INTERNALCACERT", "")
+	os.Setenv("AUTH_INTERNALCERT", "")
+	os.Setenv("AUTH_INTERNALKEY", "")
+	os.Setenv("AUTH_EXTERNALCERT", "")
+	os.Setenv("AUTH_EXTERNALKEY", "")
 
 	if err := c.Load(); err != nil {
 		t.Fatalf("Error loading configuration: %v", err)
 	}
 
-	if c.Port != 8000 {
-		t.Errorf("Unexpected port: [%d]", c.Port)
+	if c.InternalPort != 8001 {
+		t.Errorf("Unexpected internal port: [%d]", c.InternalPort)
+	}
+
+	if c.ExternalPort != 8000 {
+		t.Errorf("Unexpected external port: [%d]", c.ExternalPort)
 	}
 
 	if c.LogLevel != "info" {
@@ -80,15 +102,23 @@ func TestDefaultValues(t *testing.T) {
 		t.Errorf("Unexpected MongoDB URL: [%s]", c.MongoURL)
 	}
 
-	if c.CACert != "/certificates/ca.pem" {
-		t.Errorf("Unexpected CA certificate path: [%s]", c.CACert)
+	if c.InternalCACert != "/certificates/ca.pem" {
+		t.Errorf("Unexpected internal CA certificate path: [%s]", c.InternalCACert)
 	}
 
-	if c.Cert != "/certificates/auth-store-cert.pem" {
-		t.Errorf("Unexpected certificate path: [%s]", c.Cert)
+	if c.InternalCert != "/certificates/auth-store-cert.pem" {
+		t.Errorf("Unexpected internal certificate path: [%s]", c.InternalCert)
 	}
 
-	if c.Key != "/certificates/auth-store-key.pem" {
-		t.Errorf("Unexpected private key path: [%s]", c.Key)
+	if c.InternalKey != "/certificates/auth-store-key.pem" {
+		t.Errorf("Unexpected internal private key path: [%s]", c.InternalKey)
+	}
+
+	if c.ExternalCert != "" {
+		t.Errorf("Unexpected external certificate path: [%s]", c.ExternalCert)
+	}
+
+	if c.ExternalKey != "" {
+		t.Errorf("Unexpected external private key: [%s]", c.ExternalKey)
 	}
 }

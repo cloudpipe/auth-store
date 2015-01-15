@@ -18,7 +18,7 @@ func main() {
 	}
 
 	log.WithFields(log.Fields{
-		"address": c.ListenAddr(),
+		"address": c.InternalListenAddr(),
 	}).Info("Auth API listening.")
 
 	// v1 routes
@@ -28,7 +28,7 @@ func main() {
 	http.HandleFunc("/v1/accounts", BindContext(c, AccountHandler))
 	http.HandleFunc("/v1/keys", BindContext(c, KeyHandler))
 
-	err = http.ListenAndServeTLS(c.ListenAddr(), c.Cert, c.Key, nil)
+	err = http.ListenAndServeTLS(c.InternalListenAddr(), c.InternalCert, c.InternalKey, nil)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"error": err,
