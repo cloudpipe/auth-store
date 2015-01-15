@@ -1,8 +1,11 @@
 package main
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
@@ -28,16 +31,35 @@ func ServeInternal(c *Context) {
 	mux.HandleFunc("/v1/style", BindContext(c, StyleHandler))
 	mux.HandleFunc("/v1/validate", BindContext(c, ValidateHandler))
 
+	// Load TLS credentials used by the internal API.
+
+	caCertPool := x509.NewCertPool()
+
+	caCertPEM, err := ioutil.ReadFile(c.InternalCACert)
+	if err != nil {
+		log.Debug("Hint: if you're running in dev mode, try running script/genkeys first.")
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Fatal("Unable to load CA certificate for internal API.")
+	}
+	caCertPool.AppendCertsFromPEM(caCertPEM)
+
+	tlsConfig := &tls.Config{
+		ClientAuth: tls.RequireAndVerifyClientCert,
+		ClientCAs:  caCertPool,
+	}
+
 	server := &http.Server{
-		Addr:    c.InternalListenAddr(),
-		Handler: mux,
+		Addr:      c.InternalListenAddr(),
+		Handler:   mux,
+		TLSConfig: tlsConfig,
 	}
 
 	log.WithFields(log.Fields{
 		"address": c.InternalListenAddr(),
 	}).Info("Internal auth API listening.")
 
-	err := server.ListenAndServeTLS(c.InternalCert, c.InternalKey)
+	err = server.ListenAndServeTLS(c.InternalCert, c.InternalKey)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"error": err,
