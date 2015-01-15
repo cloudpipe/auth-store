@@ -3,6 +3,10 @@ authstore:
   build: .
   links:
   - mongo
+  environment:
+    AUTH_LOGLEVEL: debug
+    AUTH_LOGCOLORS: "true"
+    AUTH_INTERNALCACERT: /certificates/auth-store-cert.pem
   expose:
   - "9001"
   ports:
