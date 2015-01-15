@@ -17,22 +17,55 @@ func main() {
 		return
 	}
 
+	go ServeInternal(c)
+	ServeExternal(c)
+}
+
+// ServeInternal configures and launches the internal API.
+func ServeInternal(c *Context) {
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/v1/style", BindContext(c, StyleHandler))
+	mux.HandleFunc("/v1/validate", BindContext(c, ValidateHandler))
+
+	server := &http.Server{
+		Addr:    c.InternalListenAddr(),
+		Handler: mux,
+	}
+
 	log.WithFields(log.Fields{
 		"address": c.InternalListenAddr(),
-	}).Info("Auth API listening.")
+	}).Info("Internal auth API listening.")
 
-	// v1 routes
-	http.HandleFunc("/v1/style", BindContext(c, StyleHandler))
-	http.HandleFunc("/v1/validate", BindContext(c, ValidateHandler))
-
-	http.HandleFunc("/v1/accounts", BindContext(c, AccountHandler))
-	http.HandleFunc("/v1/keys", BindContext(c, KeyHandler))
-
-	err = http.ListenAndServeTLS(c.InternalListenAddr(), c.InternalCert, c.InternalKey, nil)
+	err := server.ListenAndServeTLS(c.InternalCert, c.InternalKey)
 	if err != nil {
 		log.WithFields(log.Fields{
 			"error": err,
-		}).Error("Unable to launch auth API.")
+		}).Fatal("Unable to launch internal auth API.")
+	}
+}
+
+// ServeExternal configures and launches the external API.
+func ServeExternal(c *Context) {
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/v1/accounts", BindContext(c, AccountHandler))
+	mux.HandleFunc("/v1/keys", BindContext(c, KeyHandler))
+
+	server := &http.Server{
+		Addr:    c.ExternalListenAddr(),
+		Handler: mux,
+	}
+
+	log.WithFields(log.Fields{
+		"address": c.ExternalListenAddr(),
+	}).Info("External auth API listening.")
+
+	err := server.ListenAndServeTLS(c.ExternalCert, c.ExternalKey)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Fatal("Unable to launch external auth API.")
 	}
 }
 
