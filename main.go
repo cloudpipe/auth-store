@@ -28,6 +28,11 @@ func main() {
 func ServeInternal(c *Context) {
 	mux := http.NewServeMux()
 
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain")
+		w.Write([]byte("auth-store internal API alive and running."))
+	})
+
 	mux.HandleFunc("/v1/style", BindContext(c, StyleHandler))
 	mux.HandleFunc("/v1/validate", BindContext(c, ValidateHandler))
 
@@ -70,6 +75,11 @@ func ServeInternal(c *Context) {
 // ServeExternal configures and launches the external API.
 func ServeExternal(c *Context) {
 	mux := http.NewServeMux()
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain")
+		w.Write([]byte("auth-store external API alive and running."))
+	})
 
 	mux.HandleFunc("/v1/accounts", BindContext(c, AccountHandler))
 	mux.HandleFunc("/v1/keys", BindContext(c, KeyHandler))
