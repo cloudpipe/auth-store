@@ -10,7 +10,7 @@ This is the default implementation of the [cloudpipe authentication backend prot
 
  1. Install [Docker](https://docs.docker.com/installation/mac/) on your system.
  2. Install [fig](http://www.fig.sh/install.html).
- 3. Use `script/genkeys` to generate a self-signed TLS certificate in `certificates/`.
+ 3. Use `script/genkeys` to generate self-signed TLS keypairs in `certificates/`.
  4. Run `fig build && fig up -d` to build and launch everything locally.
 
 To run the tests, use `script/test`. You can also use `script/mongo` to connect to your local MongoDB database.
