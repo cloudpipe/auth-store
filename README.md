@@ -24,10 +24,10 @@ Once it's up and running, you can use `curl` to interact the auth API. Here are 
 DOCKER=$(boot2docker ip 2>/dev/null)
 
 # Create a new account.
-curl -k -i -X POST https://${DOCKER}:8001/v1/accounts -d '{"name":"me@gmail.com","password":"shhh"}'
+curl -k -i -X POST https://${DOCKER}:8001/v1/accounts -d 'accountName=me%40gmail.com&password=shhh'
 
 # Generate a new API key.
-curl -k -i -X POST https://${DOCKER}:8001/v1/keys -u me@gmail.com:shhh
+KEY=$(curl -k -X POST https://${DOCKER}:8001/v1/keys -d 'accountName=me%40gmail.com&password=shhh')
 
 # Validate an existing key.
 curl -k -i "https://${DOCKER}:8001/v1/validate?accountName=me%40gmail.com&apiKey=${KEY}"
