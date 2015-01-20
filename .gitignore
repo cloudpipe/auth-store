@@ -25,3 +25,6 @@ _testmain.go
 
 # Keys
 certificates/*.pem
+
+# No Godeps vendorizing, please
+Godeps/_workspace
