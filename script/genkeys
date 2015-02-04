@@ -5,19 +5,32 @@ set -o errexit
 ROOT=$(cd $(dirname $0)/..; pwd)
 cd ${ROOT}
 
-OPENSSL="docker run --volume ${ROOT}/certificates:/certificates --rm smashwilson/openssl"
+set -o errexit
 
-# selfsigned generates a self-signed keypair.
-selfsigned()
-{
-  local NAME=$1
+ROOT=$(cd $(dirname $0)/..; pwd)
 
-  echo ">> generating keypair for ${NAME}"
-  ${OPENSSL} openssl req -x509 -newkey rsa:2048 -days 365 -nodes -batch \
-    -keyout /certificates/${NAME}-key.pem \
-    -out /certificates/${NAME}-cert.pem
-  echo "<< keypair generated for ${NAME}"
-}
+KEYMASTER="docker run --volume ${ROOT}/certificates:/certificates --rm cloudpipe/keymaster"
 
-selfsigned "auth-store"
-selfsigned "external"
+# Randomly create a password file, if you haven't supplied one already.
+# For development mode, we'll just use the same (random) password for everything.
+if [ ! -f "${ROOT}/certificates/password" ]; then
+  echo ">> creating a random password in ${ROOT}/certificates/password."
+  touch ${ROOT}/certificates/password
+  chmod 600 ${ROOT}/certificates/password
+  # "If the same pathname argument is supplied to -passin and -passout arguments then the first
+  # line will be used for the input password and the next line for the output password."
+  cat /dev/random | head -c 128 | base64 > ${ROOT}/certificates/password
+  echo "<< random password created"
+fi
+
+# Certificate authority.
+${KEYMASTER} ca
+
+# Keypair for the API and job runner.
+${KEYMASTER} signed-keypair -n cloudpipe -h cloudpipe -p client
+
+# Keypair for the authentication server.
+${KEYMASTER} signed-keypair -n auth-store -h authstore -p server
+
+# Self-signed, independent keypair to be used by externally accessible endpoints.
+${KEYMASTER} selfsigned-keypair -n external

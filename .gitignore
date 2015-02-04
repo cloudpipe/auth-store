@@ -25,6 +25,9 @@ _testmain.go
 
 # Keys
 certificates/*.pem
+certificates/*.srl
+certificates/*.csr
+certificates/password
 
 # No Godeps vendorizing, please
 Godeps/_workspace
