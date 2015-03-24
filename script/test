@@ -5,6 +5,6 @@ set -o errexit
 ROOT=$(dirname $0)/..
 cd ${ROOT}
 
-fig build >/dev/null 2>&1 || echo "fig build failed!"
+docker-compose build >/dev/null 2>&1 || echo "docker-compose build failed!"
 
-exec fig run --no-deps --rm authstore go test github.com/cloudpipe/auth-store/... $@
+exec docker-compose run --no-deps --rm authstore go test github.com/cloudpipe/auth-store/... $@
